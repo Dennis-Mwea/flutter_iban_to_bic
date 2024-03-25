@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:html/dom.dart';
 import 'package:iban_to_bic/src/models/bank.dart';
 import 'package:iban_to_bic/src/utils/utils.dart';
@@ -40,17 +39,16 @@ Future<void> de() async {
   final List<String> rows =
       worksheet.skip(1).where((String element) => element.isNotEmpty).toList();
   for (String item in rows) {
-    final Bank bank = _rowToObject(item.split(';').toList());
-    if (bank.status != 'D') {
-      final String c = bank.code!;
-      bank.removeCode();
-      bank.removeStatus();
+    Bank row = _rowToObject(item.split(';').toList());
+    if (row.status != 'D') {
+      final String c = row.code!;
+      row = row
+        ..removeCode()
+        ..removeStatus();
 
       if (!bankCodesObj.containsKey(c)) {
-        bankCodesObj[c] = Bank(code: c, branches: <Bank>[]);
+        bankCodesObj[c] = Bank(code: c, branches: <Bank>[row]);
       }
-      bankCodesObj.update(c,
-          (Bank value) => value.copyWith(branches: value.branches..add(bank)));
     }
   }
 
@@ -60,17 +58,14 @@ Future<void> de() async {
     assert(c.branches.where((Bank b) => b.hasOwnCode!).length == 1);
 
     // make sure that the branch where "hasOwnCode" is true is at the beginning, then that property can be removed
-    final Bank? bankWithOwnCode =
-        c.branches.firstWhereOrNull((Bank b) => b.hasOwnCode!);
     c = c.copyWith(
-        branches: c.branches.where((Bank b) => !b.hasOwnCode!).toList());
-    if (bankWithOwnCode != null) {
-      c = c.copyWith(branches: <Bank>[bankWithOwnCode, ...c.branches]);
-    }
-
-    for (Bank b in c.branches) {
-      b.removeHasOwnCode();
-    }
+        branches: List<Bank>.of(<Bank>[
+      ...c.branches.where((Bank b) => b.hasOwnCode!),
+      ...c.branches.where((Bank b) => !b.hasOwnCode!)
+    ]));
+    c = c.copyWith(
+        branches:
+            List<Bank>.of(c.branches.map((Bank e) => e.removeHasOwnCode())));
 
     // if all branches have the same name and short name, put them into the parent entry
     if (Set<String>.from(
@@ -79,10 +74,10 @@ Future<void> de() async {
         1) {
       c = c.copyWith(name: c.branches[0].name);
       c = c.copyWith(shortName: c.branches[0].shortName);
-      for (Bank b in c.branches) {
-        b.removeName();
-        b.removeShortName();
-      }
+      c = c.copyWith(
+          branches: List<Bank>.of(c.branches.map((Bank e) => e
+            ..removeName()
+            ..removeShortName())));
     }
 
     // if all branches have the same BIC, put it into the parent entry as well
@@ -93,23 +88,15 @@ Future<void> de() async {
           .toList())
     ];
     if (bics.length == 1) {
-      c.copyWith(bic: bics[0]);
-      for (Bank b in c.branches) {
-        b.removeBic();
-      }
+      c = c.copyWith(
+          bic: bics[0],
+          branches: List<Bank>.of(c.branches.map((Bank e) => e.removeBic())));
     }
-
-    // move the branches property to the end of the object
-    final List<Bank> b = List<Bank>.of(c.branches);
-    c.removeBranches();
-    c = c.copyWith(branches: b);
 
     // remove all branches that have no properties anymore
     c = c.copyWith(
-        branches: c.branches.where((Bank b) => b != Bank.empty).toList());
-    if (c.branches.isEmpty) {
-      c.removeBranches();
-    }
+        branches:
+            List<Bank>.of(c.branches.where((Bank b) => b.isEmpty).toList()));
 
     bankCodesObj[c.code!] = c;
   }

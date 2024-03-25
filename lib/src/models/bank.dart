@@ -1,12 +1,13 @@
 import 'dart:convert';
 
+import 'package:equatable/equatable.dart';
 import 'package:iban_to_bic/src/models/bank_address.dart';
 import 'package:iban_to_bic/src/models/bank_contact.dart';
 
 /// The object returned by [ibanToBank] from which you can obtain the BIC via
 /// [Bank.bic], and also provides some other useful information like
 /// [Bank.name].
-class Bank {
+class Bank extends Equatable {
   /// The BIC value.
   final String? bic;
   final String? code;
@@ -37,8 +38,6 @@ class Bank {
       this.branches = const <Bank>[],
       this.addresses = const <BankAddress>[]});
 
-  static const Bank empty = Bank();
-
   Bank copyWith(
           {String? bic,
           String? code,
@@ -64,8 +63,10 @@ class Bank {
 
   @override
   String toString() {
-    String bank = 'Bank(\n'
-        "    bic: '${bic ?? ''}',\n";
+    String bank = 'Bank(\n';
+    if (bic != null) {
+      bank += "    bic: '$bic',\n";
+    }
     if (code != null) {
       bank += "    code: '$code',\n";
     }
@@ -88,10 +89,13 @@ class Bank {
       bank += '    contact: $contact,\n';
     }
     if (addresses.isNotEmpty) {
-      bank += '    addresses: <BankAddress>$addresses';
+      bank += '    addresses: <BankAddress>$addresses],';
+    }
+    if (branches.isNotEmpty) {
+      bank += '    branches: <Bank>$branches,';
     }
 
-    return '$bank)';
+    return '${bank.substring(0, bank.length - 2)})';
   }
 
   Bank removeCode() => Bank(
@@ -142,18 +146,6 @@ class Bank {
       shortName: shortName,
       hasOwnCode: hasOwnCode);
 
-  Bank removeBank() => Bank(
-      code: code,
-      bic: null,
-      name: name,
-      names: names,
-      contact: contact,
-      addresses: addresses,
-      status: status,
-      hasOwnCode: hasOwnCode,
-      shortName: shortName,
-      branches: branches);
-
   Bank removeHasOwnCode() => Bank(
       code: code,
       bic: bic,
@@ -166,18 +158,6 @@ class Bank {
       shortName: shortName,
       branches: branches);
 
-  Bank removeBranches() => Bank(
-      bic: bic,
-      code: code,
-      name: name,
-      names: names,
-      status: status,
-      contact: contact,
-      branches: <Bank>[],
-      addresses: addresses,
-      shortName: shortName,
-      hasOwnCode: hasOwnCode);
-
   Bank removeBic() => Bank(
       code: code,
       bic: null,
@@ -189,4 +169,26 @@ class Bank {
       hasOwnCode: hasOwnCode,
       shortName: shortName,
       branches: branches);
+
+  @override
+  List<Object?> get props => <Object?>[
+        bic,
+        code,
+        name,
+        status,
+        hasOwnCode,
+        shortName,
+        branches,
+        contact,
+        names,
+        addresses
+      ];
+
+  bool get isEmpty =>
+      code == null &&
+      name == null &&
+      shortName == null &&
+      status == null &&
+      bic == null &&
+      hasOwnCode == null;
 }

@@ -19,9 +19,9 @@ class BankContact {
   @override
   String toString() {
     return 'BankContact('
-        "url: '$url',"
-        "fax: '$fax',"
-        "email: '$email',"
+        "url: '$url', "
+        "fax: '$fax', "
+        "email: '$email', "
         "phone: '$phone')";
   }
 }

@@ -54,9 +54,9 @@ class BankAddress {
       address += 'box: "$box", ';
     }
     if (street != null) {
-      address += 'street: "${street?.replaceAll('"', '')}"';
+      address += 'street: "${street?.replaceAll('"', '')}",';
     }
 
-    return '$address)';
+    return '${address.substring(0, address.length - 1)})';
   }
 }
