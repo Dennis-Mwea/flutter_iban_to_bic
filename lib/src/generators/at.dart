@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:iban_to_bic/src/models/bank.dart';
 import 'package:iban_to_bic/src/models/bank_address.dart';
@@ -28,6 +29,16 @@ BankContact _getContact(List<String> bankDetails, List<String> titles) {
 }
 
 Future<void> at() async {
+  print('Dir: ${Directory.current}');
+  final Uri script = Platform.script;
+  final Directory scriptDir = Directory(script.toFilePath());
+  print('Dir: ${scriptDir.parent}');
+
+  print(Platform.environment);
+  // String pubCachePath = Platform.environment['PUB_CACHE'];
+  // print('pubCachePath: $pubCachePath');
+  return;
+
   List<String> banks = await downloadCSV(
     'https://www.oenb.at/docroot/downloads_observ/sepa-zv-vz_gesamt.csv',
     skip: 5,
