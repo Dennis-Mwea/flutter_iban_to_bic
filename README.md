@@ -35,3 +35,10 @@ Future<void> main() async {
   print('Location: ${bic.bankLocation}');    // result: Frankfurt am Main
 }
 ```
+# Updating the dataset
+The following will fetch the newest data from the respective national bank authorities (e.g. Bundesbank in Germany or OeNB in Austria) and regenerate the files in the datasets and the datasets-extended directory:
+
+```bash
+dart run bin/generate
+```
+For Spain and France, data directly from the European Central Bank is used, see here.

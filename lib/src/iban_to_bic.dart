@@ -1,7 +1,16 @@
 part of iban_to_bic;
 
+/// Validates the SWIFT BIC the given [ibanString]. Currently supports AT, BE,
+/// DE, ES, FR LT, LU and NL IBANs.
+/// Returns a [bool] if valid,
+bool ibanIsValid(String ibanString) {
+  ibanString = ibantools.electronicFormatIBAN(ibanString) ?? '';
+
+  return ibantools.isValidIBAN(ibanString);
+}
+
 /// Determines the SWIFT BIC the given [ibanString]. Currently supports AT, BE,
-/// DE, LT, LU and NL IBANs.
+/// DE, ES, FR, LT, LU and NL IBANs.
 /// Returns a [Bank] object from which you can obtain the BIC via [Bank.bic],
 /// and also provides some other useful information like [Bank.name].
 Bank ibanToBic(String ibanString) {

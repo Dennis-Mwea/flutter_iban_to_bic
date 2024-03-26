@@ -1,3 +1,7 @@
+## 0.0.9
+
+* Add Flutter Generate to allow Banks list update from official bank lists site
+
 ## 0.0.8
 
 * added some code documentation
